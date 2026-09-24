@@ -1,5 +1,13 @@
 # Asynchronous FIFO CDC Design and Verification Study
 
+## For reviewers (30-second read)
+
+- **What:** a 64-entry, 8-bit asynchronous FIFO crossing an 80 MHz write clock and a 50 MHz read clock, verified with a UVM environment. Canonical code is in [`Post_M5/UVM/`](Post_M5/UVM/).
+- **Team and my part:** a 4-person team project from Spring 2024. I made 66 of the 96 commits and wrote the RTL, UVM scoreboard, driver, and monitors. I re-verified and cleaned up the evidence in May 2026.
+- **Bugs fixed:** both CDC pointer synchronizers were reset from the source clock domain instead of the destination ([design.md D-1](Post_M5/UVM/design.md)). Simulation could not catch it, because the testbench toggles both resets together; it was a design-review fix. The half flags came from one counter written by both clock domains, which I replaced with per-domain pointer arithmetic (D-2).
+- **Results:** a clean UVM run covers 659 writes and 596 reads with 0 mismatches. An injected write-data corruption (`WDATA_CORRUPTION_BUG`) produced 250 scoreboard mismatches ([transcript](Post_M5/docs/transcript_datacorruptionbug.txt)). Directed fill/drain tests confirm the half flags at 32 entries, full at 64, and empty at 0.
+- **Limits:** simulation only. There are no SVA assertions or formal proofs here, and simulation does not prove metastability safety.
+
 This repository documents the design, verification, debugging, and validation of
 an asynchronous FIFO for safe data transfer across independent clock domains.
 The work is organized as a milestone progression from a conventional
